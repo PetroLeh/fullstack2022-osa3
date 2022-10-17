@@ -33,15 +33,20 @@ app.get('/api/persons', (request, response) => {
     })
 })
 
-app.get('/api/persons/:id', (request, response) => {
-    Person.findById(request.params.id).then( person => {
+app.get('/api/persons/:id', (request, response, next) => {
+    Person.findById(request.params.id)
+    .then( person => {
         response.json(person)
     })
+    .catch( error => next(error))
 })
 
-app.delete('/api/persons/:id', (request, response) => {
-
-    response.status(204).end()
+app.delete('/api/persons/:id', (request, response, next) => {
+    Person.findByIdAndRemove(request.params.id)
+    .then( result => {
+        response.sendStatus(204).end()
+    })
+    .catch( error => next(error))
 })
 
 app.post('/api/persons', (request, response) => {
@@ -65,15 +70,42 @@ app.post('/api/persons', (request, response) => {
     })
 })
 
-app.get('/info', (request, response) => {
-    const num = 1
-    const date = new Date()
+app.put('/api/persons/:id', (request, response) => {
+    const body = request.body
+    const person = {
+        name: body.name,
+        number: body.number
+    }
+    Person.findByIdAndUpdate(request.params.id, person, { new: true })
+    .then( updatedData => {
+        response.json(updatedData)
+    })
+    .catch( error => next(error))
+})
 
-    info = `<p>Phonebook has info for ${num} people</p>
-            <p>${date}</p>`
-    response.send(info)
+app.get('/info', (request, response, next) => {
+    Person.count( (error, count) => {
+        if (error) {
+            next(error)
+        }
+        const date = new Date()
+        info = `<p>Phonebook has info for ${count} people</p>
+                <p>${date}</p>`
+        response.send(info)
+    })
 
 })
+
+const errorHandler = (error, request, response, next) => {
+    console.error(error)
+
+    if (error.name === 'CastError') {
+        return response.status(400).send({ error: 'malformatted id' })
+    }
+    next(error)
+}
+
+app.use(errorHandler)
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
