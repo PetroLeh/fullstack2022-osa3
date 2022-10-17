@@ -11,6 +11,7 @@
     "deploy:full": "npm run build:ui && npm run deploy",
     "logs:prod": "~/.fly/bin/fly logs",
     "open": "~/.fly/bin/fly open",
+    "lint": "eslint .",
     "test": "echo \"No tests\" && exit 1"
   },
   "author": "Petro Lehtonen",
@@ -22,5 +23,8 @@
     "mongoose": "^6.6.4",
     "morgan": "^1.10.0",
     "nodemon": "^2.0.20"
+  },
+  "devDependencies": {
+    "eslint": "^8.25.0"
   }
 }
